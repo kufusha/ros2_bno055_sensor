@@ -6,8 +6,9 @@ This ROS2 driver communicates with the sensor over I2C and relies only on `libi2
 ## Building from source
 This driver depends on the [Bosch Sensortec API](https://github.com/BoschSensortec/BNO055_driver), but that is unfortunately C only, so a patch is required to support C linkage with the C++ ROS2 driver.
 
+(*) 以下リポジトリURLを変更
 ```
-$ git clone --recurse-submodules https://github.com/bdholt1/ros2_bno055_sensor.git
+$ git clone --recurse-submodules https://github.com/kufusha/ros2_bno055_sensor.git
 $ cd ros2_bno055_sensor/thirdparty/BNO055_driver/
 $ git apply ../../bno055.h.patch
 $ cd ../../../
