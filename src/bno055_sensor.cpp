@@ -35,7 +35,7 @@ BNO055Sensor::BNO055Sensor(rclcpp::NodeOptions const & options)
   data_timer_ = this->create_wall_timer(10ms, std::bind(&BNO055Sensor::publish_data, this));
   diagnostics_timer_ = this->create_wall_timer(1000ms, std::bind(&BNO055Sensor::publish_diagnostics, this));
 
-  this->declare_parameter<std::string>("i2c_address", "/dev/i2c-3");
+  this->declare_parameter<std::string>("i2c_address", "/dev/i2c-imu");
   this->declare_parameter<std::string>("device_address", "0x28");
   this->declare_parameter<std::string>("frame_id", "imu_link");
 
@@ -72,7 +72,7 @@ void BNO055Sensor::initialise()
   comres += bno055_set_power_mode(BNO055_POWER_MODE_NORMAL);
 
   // set operation mode as NDOF
-  comres += bno055_set_operation_mode(BNO055_OPERATION_MODE_NDOF);
+  comres += bno055_set_operation_mode(BNO055_OPERATION_MODE_NDOF_FMC_OFF);
 
   if (comres != 0)
   {
@@ -155,11 +155,14 @@ void BNO055Sensor::publish_data()
   imu_raw_publisher_->publish(imu_raw_msg);
   temp_publisher_->publish(temp_msg);
 
+  /* operation modeをNDOFからNDOF_FMC_OFFに変更したことで出るようになった下記メッセージを削除 */
+  /*
   if (sys_calib_status == 0)
   {
     RCLCPP_WARN(this->get_logger(), "Fusion data is not reliable as system is not calibrated");
     return;
   }
+  */
 
   auto imu_data_msg = sensor_msgs::msg::Imu();
   imu_data_msg.header.stamp = time_stamp;
@@ -168,9 +171,9 @@ void BNO055Sensor::publish_data()
   imu_data_msg.orientation.y = quaternion_wxyz.y / quaternion_norm;
   imu_data_msg.orientation.z = quaternion_wxyz.z / quaternion_norm;
   imu_data_msg.orientation.w = quaternion_wxyz.w / quaternion_norm;
-  imu_data_msg.angular_velocity.x = d_gyro_xyz.x;
-  imu_data_msg.angular_velocity.y = d_gyro_xyz.y;
-  imu_data_msg.angular_velocity.z = d_gyro_xyz.z;
+  imu_data_msg.angular_velocity.x = d_gyro_xyz.x / 360.0 * 2.0 * M_PI;
+  imu_data_msg.angular_velocity.y = d_gyro_xyz.y / 360.0 * 2.0 * M_PI;
+  imu_data_msg.angular_velocity.z = d_gyro_xyz.z / 360.0 * 2.0 * M_PI;
   imu_data_msg.linear_acceleration.x = d_linear_accel_xyz.x;
   imu_data_msg.linear_acceleration.y = d_linear_accel_xyz.y;
   imu_data_msg.linear_acceleration.z = d_linear_accel_xyz.z;
