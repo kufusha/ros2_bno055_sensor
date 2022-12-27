@@ -73,6 +73,14 @@ void BNO055Sensor::initialise()
 
   // set operation mode as NDOF
   comres += bno055_set_operation_mode(BNO055_OPERATION_MODE_NDOF_FMC_OFF);
+  
+  // set axis remap value as P2
+  comres += bno055_set_axis_remap_value(BNO055_DEFAULT_AXIS);
+  
+  // set axis remap sign as P2
+  comres += bno055_set_remap_x_sign(BNO055_REMAP_AXIS_NEGATIVE);
+  comres += bno055_set_remap_y_sign(BNO055_REMAP_AXIS_NEGATIVE);
+  comres += bno055_set_remap_z_sign(BNO055_REMAP_AXIS_POSITIVE);
 
   if (comres != 0)
   {
